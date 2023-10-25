@@ -33,17 +33,18 @@ type SudokuPuzzle = number[];
 
 // the arbitrary mapping of bg3 characters to numbers between 1-9
 // that is at the heart of this smudge of software
-const megaMap = {
-  1: "karlach",
-  2: "astarion",
-  3: "wyll",
-  4: "shadowheart",
-  5: "gale",
-  6: "gortash",
-  7: "halsin",
-  8: "minthara",
-  9: "laezel",
-};
+// or not
+// const megaMap = {
+//   1: 'karlach',
+//   2: 'astarion',
+//   3: 'wyll',
+//   4: 'shadowheart',
+//   5: 'gale',
+//   6: 'gortash',
+//   7: 'halsin',
+//   8: 'minthara',
+//   9: 'laezel'
+// }
 
 // sudoku boards are 9x9
 const WIDTH = 9;
@@ -153,17 +154,16 @@ function App() {
   };
 
   const onClickReset = (): void => {
-    const newPuzzle = sudokuGenerator(difficultyLevels.indexOf(selectedDifficulty));
-    const sudoku = new Sudoku(newPuzzle)
+    const newPuzzle = sudokuGenerator(
+      difficultyLevels.indexOf(selectedDifficulty),
+    );
+    const sudoku = new Sudoku(newPuzzle);
     setPuzzle(newPuzzle);
     setCurrentBoard(newPuzzle);
-    setPuzzleSolution(sudoku.getSolution())
+    setPuzzleSolution(sudoku.getSolution());
   };
 
-  const onClickSpace = (
-    selectedIndex: number,
-    currentElement: number,
-  ): void => {
+  const onClickSpace = (selectedIndex: number): void => {
     // don't change the value if we're not playing an active game
     if (gameState !== "Playing") {
       return;
@@ -187,7 +187,16 @@ function App() {
     } else {
       newBoard[selectedIndex] = selectedNumber;
     }
+
     setCurrentBoard(newBoard);
+    console.log(
+      puzzleSolution.join(""),
+      currentBoard.join(""),
+      puzzleSolution.join("") === currentBoard.join(""),
+    );
+    if (puzzleSolution.join("") === currentBoard.join("")) {
+      setGameState("Complete");
+    }
   };
 
   const onClickNumberSelector = (n: number): void => {
@@ -220,6 +229,10 @@ function App() {
 
   return (
     <>
+      <h2>
+        The bloodthirsty dopplegangers who live in the sewers are attacking!
+        You'd better…
+      </h2>
       <h1>Gather Your Party</h1>
       <div className="controls">
         <fieldset>
@@ -247,22 +260,27 @@ function App() {
           <table className="number-selector">
             <tbody>
               <tr>
-                {[...Array(9)].map((i) => i + 1).map((_, i) => (
-                  <td
-                    key={`number-selector-cell-${i}`}
-                    className={selectedNumber === i ? "selected" : ""}
-                    onClick={() => {
-                      onClickNumberSelector(i);
-                    }}
-                  >
-                    {digitToAvatar(i + 1, true)}
-                  </td>
-                ))}
+                {[...Array(9)]
+                  .map((_, i) => (
+                    <td
+                      key={`number-selector-cell-${i + 1}`}
+                      className={selectedNumber === i + 1 ? "selected" : ""}
+                      onClick={() => {
+                        onClickNumberSelector(i + 1);
+                      }}
+                    >
+                      {digitToAvatar(i + 1, true)}
+                    </td>
+                  ))}
               </tr>
             </tbody>
           </table>
         </div>
 
+        <p>
+          Keep the same face out of the same party (3x3 square or vertical or
+          horizontal line). You'll know when you've won!{" "}
+        </p>
         <table className="sudoku-board">
           <tbody>
             {currentBoard.map((_, i) =>
@@ -273,7 +291,7 @@ function App() {
                       key={`cell${i + j}`}
                       className={puzzleCellClasses(i + j)}
                       onClick={() => {
-                        onClickSpace(j + i, el);
+                        onClickSpace(j + i);
                       }}
                     >
                       {digitToAvatar(el, true)}
@@ -296,9 +314,7 @@ function App() {
       </div>
       <div className="footer">
         <p>
-          <a href="https://github.com/sarahmeyer/bg3-sudoku">
-            src
-          </a>
+          <a href="https://github.com/sarahmeyer/bg3-sudoku">src for this game.</a> thank you to forfuns for <a href="https://github.com/einsitang/sudoku-nodejs">the sudoku package</a> and larian for bg3
         </p>
       </div>
     </>

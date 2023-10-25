@@ -1,183 +1,308 @@
-import { useState } from 'react'
-import { Sudoku, generator } from '@forfuns/sudoku'
+import React, { useEffect, useState } from "react";
+import { Sudoku, generator as sudokuGenerator } from "@forfuns/sudoku";
 
-import './App.css'
+import "./App.css";
 
-import karlach from './assets/karlach.png'
-import astarion from './assets/astarion.png'
-import wyll from './assets/wyll.png'
-import shadowheart from './assets/shadowheart.png'
-import laezel from './assets/laezel.png'
-import gale from './assets/gale.png'
-import gortash from './assets/gortash.png'
-import halsin from './assets/halsin.png'
-import minthara from './assets/minthara.png'
+import karlach from "./assets/karlach.png";
+import astarion from "./assets/astarion.png";
+import wyll from "./assets/wyll.png";
+import shadowheart from "./assets/shadowheart.png";
+import laezel from "./assets/laezel.png";
+import gale from "./assets/gale.png";
+import gortash from "./assets/gortash.png";
+import halsin from "./assets/halsin.png";
+import minthara from "./assets/minthara.png";
 
-enum GameStates {
-  Loading,
-  Playing,
-  Complete
-}
-type SudokuPuzzle = number[]
+import karlachThumb from "./assets/karlach-thumb.png";
+import astarionThumb from "./assets/astarion-thumb.png";
+import wyllThumb from "./assets/wyll-thumb.png";
+import shadowheartThumb from "./assets/shadowheart-thumb.png";
+import laezelThumb from "./assets/laezel-thumb.png";
+import galeThumb from "./assets/gale-thumb.png";
+import gortashThumb from "./assets/gortash-thumb.png";
+import halsinThumb from "./assets/halsin-thumb.png";
+import mintharaThumb from "./assets/minthara-thumb.png";
 
-const WIDTH = 9
-const DIFFICULTY = 0
+// const fruits = ["Apple", "Orange", "Pear"] as const;
+// type Fruit = typeof fruits[number]; // "Apple" | "Orange" | "Pear"
+const gameStates = ["Loading", "Playing", "Complete", "Error"] as const;
+type GameState = (typeof gameStates)[number];
+const difficultyLevels = ["Explorer", "Normal", "Tactician"] as const;
+type DifficultyLevel = (typeof difficultyLevels)[number];
+type SudokuPuzzle = number[];
 
-function App () {
-  const [gameState, setGameState] = useState<GameStates>(GameStates.Playing)
-  const [selectedNumber, setSelectedNumber] = useState<number>(-1)
+// the arbitrary mapping of bg3 characters to numbers between 1-9
+// that is at the heart of this smudge of software
+const megaMap = {
+  1: "karlach",
+  2: "astarion",
+  3: "wyll",
+  4: "shadowheart",
+  5: "gale",
+  6: "gortash",
+  7: "halsin",
+  8: "minthara",
+  9: "laezel",
+};
 
-  const firstPuzzle = generator(DIFFICULTY)
-  const [puzzle, setPuzzle] = useState<SudokuPuzzle>(firstPuzzle)
-  const sudoku = new Sudoku(puzzle, true)
+// sudoku boards are 9x9
+const WIDTH = 9;
+// this value for empty squares comes from @forfuns/sudoku
+const UNSET_VALUE = -1;
+// an array of width^2 length, all values are -1 representing empty squares
+const EMPTY_BOARD = [...Array(WIDTH * WIDTH)].map(() => UNSET_VALUE);
+// a board that is all astarion
+const ROOM_AND_IM_THE_BOARD = [...Array(WIDTH * WIDTH)].map(() => UNSET_VALUE);
 
-  const [currentBoard, setCurrentBoard] = useState<SudokuPuzzle>(puzzle)
+const makePuzzleAndSolutionAsync = async (
+  level: DifficultyLevel,
+): Promise<[SudokuPuzzle, SudokuPuzzle] | undefined> => {
+  try {
+    const generatedPuzzle = sudokuGenerator(difficultyLevels.indexOf(level));
+    const sudoku = new Sudoku(generatedPuzzle, true);
+    const generatedSolution = sudoku.getSolution();
+    return [generatedPuzzle, generatedSolution];
+  } catch (e) {
+    console.log("error thrown by makePuzzleAndSolutionAsync", e);
+  }
+};
 
-  const solution = sudoku.getSolution()
+function App() {
+  const [gameState, setGameState] = useState<GameState>("Loading");
+  const [selectedNumber, setSelectedNumber] = useState<number>(UNSET_VALUE);
+  const [selectedDifficulty, setSelectedDifficulty] =
+    useState<DifficultyLevel>("Explorer");
 
-  const elementAsAvatar = (element: number): React.ReactNode => {
-    let avatarPath = null
+  const [puzzle, setPuzzle] = useState<SudokuPuzzle>(EMPTY_BOARD);
+  const [puzzleSolution, setPuzzleSolution] = useState<SudokuPuzzle>(
+    ROOM_AND_IM_THE_BOARD,
+  );
+
+  const [currentBoard, setCurrentBoard] = useState<SudokuPuzzle>(puzzle);
+
+  useEffect(() => {
+    async function getPuzzle(): Promise<void> {
+      const puzzleAndSolution =
+        await makePuzzleAndSolutionAsync(selectedDifficulty);
+      if (
+        puzzleAndSolution &&
+        puzzleAndSolution !== null &&
+        puzzle?.length > 1
+      ) {
+        setCurrentBoard(puzzleAndSolution[0]);
+        setPuzzle(puzzleAndSolution[0]);
+        setPuzzleSolution(puzzleAndSolution[1]);
+        setGameState("Playing");
+      }
+    }
+    getPuzzle().catch((e) => {
+      console.log("error trying to generate puzzle", e);
+    });
+  }, []);
+
+  const digitToAvatar = (
+    element: number,
+    fullsize: boolean = false,
+  ): React.ReactNode => {
+    // in every program that actually does anything you write an ugly switch statement
+    let avatarPath = null;
     switch (element) {
       case 1:
-        avatarPath = karlach
-        break
+        avatarPath = fullsize ? karlach : karlachThumb;
+        break;
       case 2:
-        avatarPath = astarion
-        break
+        avatarPath = fullsize ? astarion : astarionThumb;
+        break;
       case 3:
-        avatarPath = wyll
-        break
+        avatarPath = fullsize ? wyll : wyllThumb;
+        break;
       case 4:
-        avatarPath = shadowheart
-        break
+        avatarPath = fullsize ? shadowheart : shadowheartThumb;
+        break;
       case 5:
-        avatarPath = gale
-        break
+        avatarPath = fullsize ? gale : galeThumb;
+        break;
       case 6:
-        avatarPath = gortash
-        break
+        avatarPath = fullsize ? gortash : gortashThumb;
+        break;
       case 7:
-        avatarPath = halsin
-        break
+        avatarPath = fullsize ? halsin : halsinThumb;
+        break;
       case 8:
-        avatarPath = minthara
-        break
+        avatarPath = fullsize ? minthara : mintharaThumb;
+        break;
       case 9:
-        avatarPath = laezel
-        break
+        avatarPath = fullsize ? laezel : laezelThumb;
+        break;
       default:
-        break
+        break;
     }
 
-    return avatarPath ? <img src={avatarPath} alt={`Number ${element}`} /> : null
-  }
+    if (avatarPath !== null && avatarPath.length > 0) {
+      return <img src={avatarPath} alt={`Number ${element}`} />;
+    }
+    return null;
+  };
 
   const puzzleCellClasses = (i: number): string => {
-    // console.log('puzzleCellClasses', i, puzzle[i], puzzle[i] > 0 ? 'fixed-space' : '')
-    return puzzle[i] > 0 ? 'fixed-space' : ''
-  }
+    // for styling purposes, if the game has been won
+    if (gameState === "Complete" || gameState === "Loading") {
+      return "fixed-space";
+    }
+    return puzzle[i] > 0 ? "fixed-space" : "";
+  };
 
   const onClickReset = (): void => {
-    const newPuzzle = generator(DIFFICULTY)
-    setPuzzle(newPuzzle)
-    setCurrentBoard(newPuzzle)
-  }
+    const newPuzzle = sudokuGenerator(difficultyLevels.indexOf(selectedDifficulty));
+    const sudoku = new Sudoku(newPuzzle)
+    setPuzzle(newPuzzle);
+    setCurrentBoard(newPuzzle);
+    setPuzzleSolution(sudoku.getSolution())
+  };
 
-  const onClickSpace = (selectedIndex: number, currentElement: number): void => {
+  const onClickSpace = (
+    selectedIndex: number,
+    currentElement: number,
+  ): void => {
     // don't change the value if we're not playing an active game
-    if (gameState !== GameStates.Playing) {
-      return
+    if (gameState !== "Playing") {
+      return;
     }
     // don't change the value if this value is set in the puzzle
     if (puzzle[selectedIndex] > 0) {
-      return
+      return;
     }
     // don't change the value if we don't have a selected number to change it to
     if (selectedNumber < 0) {
-      return
+      return;
     }
 
-    const newBoard = currentBoard.map((el) => el)
+    // okay we're actually doing this thing!
+    // this, for our sins, is javascript so we need to create a new array
+    // either set the clicked square as the selected number
+    // or if it's already set as the selected number, unset it
+    const newBoard = currentBoard.map((el) => el);
     if (newBoard[selectedIndex] === selectedNumber) {
-      newBoard[selectedIndex] = -1
+      newBoard[selectedIndex] = UNSET_VALUE;
     } else {
-      newBoard[selectedIndex] = selectedNumber
+      newBoard[selectedIndex] = selectedNumber;
     }
-    setCurrentBoard(newBoard)
-
-    // this is where the magic happens
-    // if the current board is the same as the solution
-    // we're done!
-    if (solution.join('') === currentBoard.join('')) {
-      setGameState(GameStates.Complete)
-    }
-  }
+    setCurrentBoard(newBoard);
+  };
 
   const onClickNumberSelector = (n: number): void => {
+    // the "number selector" is a list of all the characters
+    // clicking on one selects the character/number as the one to fill in
+    // unless that one is already the 'selected number', in which case it's unset
     if (n !== selectedNumber) {
-      setSelectedNumber(n)
+      setSelectedNumber(n);
     } else {
-      setSelectedNumber(-1)
+      setSelectedNumber(UNSET_VALUE);
     }
-  }
+  };
 
-  const onClickSubmit = () => {
+  const onClickSubmit = (): void => {
     // this is where the magic happens
     // if the current board is the same as the solution
-    // we're done!
-    if (solution.join('') === currentBoard.join('')) {
-      setGameState(GameStates.Complete)
+    // the game is won!
+    if (puzzleSolution.join("") === currentBoard.join("")) {
+      setGameState("Complete");
     }
-  }
+  };
+
+  const onSelectDifficulty = (
+    evt: React.ChangeEvent<HTMLInputElement>,
+  ): void => {
+    const { value } = evt.target;
+    console.log({ value });
+    setSelectedDifficulty(value as DifficultyLevel);
+  };
 
   return (
     <>
-      <h1>Sudoku But Make It BG3</h1>
+      <h1>Gather Your Party</h1>
+      <div className="controls">
+        <fieldset>
+          <legend>Select a difficulty level</legend>
+          <div className="difficulties">
+            {difficultyLevels.map((level) => (
+              <div key={level}>
+                <input
+                  type="radio"
+                  onChange={onSelectDifficulty}
+                  id={level}
+                  name="difficultyLevel"
+                  value={level}
+                  checked={level === selectedDifficulty}
+                />
+                <label htmlFor={level}>{level}</label>
+              </div>
+            ))}
+          </div>
+        </fieldset>
+      </div>
       <div className="card">
-        <button onClick={onClickSubmit}>
-          Check Solution
-        </button>
-        <button onClick={onClickReset}>
-          New Puzzle
-        </button>
-        <table className="number-selector">
-          <tbody>
-            <tr>
-              {[...Array(9)].map((_, i) => <td key={`number-selector-cell-${i}`} className={selectedNumber === i + 1 ? 'selected' : ''} onClick={() => { onClickNumberSelector(i + 1) }}>{elementAsAvatar(i + 1)}</td>)}
-            </tr>
-          </tbody>
-        </table>
-        <p>
-          Game state is {gameState} and have won test is {solution.join('') === currentBoard.join('') ? "true" : "false"}
-        </p>
-        <p>
-          Puzzle is <code>{puzzle}</code>
-        </p>
+        <div>
+          <h3>Choose Your Fighter</h3>
+          <table className="number-selector">
+            <tbody>
+              <tr>
+                {[...Array(9)].map((i) => i + 1).map((_, i) => (
+                  <td
+                    key={`number-selector-cell-${i}`}
+                    className={selectedNumber === i ? "selected" : ""}
+                    onClick={() => {
+                      onClickNumberSelector(i);
+                    }}
+                  >
+                    {digitToAvatar(i + 1, true)}
+                  </td>
+                ))}
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
-        <p>
-          Current board is <code>{currentBoard}</code>
-        </p>
-        <p>
-          Solution is is <code>{solution}</code>
-        </p>
-      {gameState === GameStates.Complete ? <p>You Won!</p> : null }
-
-       {gameState === GameStates.Playing
-         ? <table className="sudoku-board">
+        <table className="sudoku-board">
           <tbody>
             {currentBoard.map((_, i) =>
-              i % WIDTH === 0
-                ? <tr key={`row${i}`}>{currentBoard.slice(i, i + WIDTH).map((el, j) =>
-                <td key={`cell${i + j}`} className={puzzleCellClasses(i + j)} onClick={() => { onClickSpace(j + i, el) }}>{elementAsAvatar(el)}</td>
-                )}</tr>
-                : null
+              i % WIDTH === 0 ? (
+                <tr key={`row${i}`}>
+                  {currentBoard.slice(i, i + WIDTH).map((el, j) => (
+                    <td
+                      key={`cell${i + j}`}
+                      className={puzzleCellClasses(i + j)}
+                      onClick={() => {
+                        onClickSpace(j + i, el);
+                      }}
+                    >
+                      {digitToAvatar(el, true)}
+                    </td>
+                  ))}
+                </tr>
+              ) : null,
             )}
           </tbody>
         </table>
-         : null}
+        {
+          <p style={gameState !== "Complete" ? { visibility: "hidden" } : {}}>
+            You Won!
+          </p>
+        }
+        <div className="control-buttons">
+          <button onClick={onClickSubmit}>Check Solution</button>
+          <button onClick={onClickReset}>New Puzzle</button>
+        </div>
+      </div>
+      <div className="footer">
+        <p>
+          <a href="https://github.com/sarahmeyer/bg3-sudoku">
+            src
+          </a>
+        </p>
       </div>
     </>
-  )
+  );
 }
 
-export default App
+export default App;

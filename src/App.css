@@ -116,7 +116,9 @@ td {
 }
 
 .number-selector td img {
-  max-width: 6vw;
+  width: 9vw;
+  min-width: 30px;
+  max-width: 80px;
 }
 
 .number-selector td.selected {

@@ -3,15 +3,15 @@ import { Sudoku, generator as sudokuGenerator } from "@forfuns/sudoku";
 
 import "./App.css";
 
-import karlach from "./assets/karlach.png";
-import astarion from "./assets/astarion.png";
-import wyll from "./assets/wyll.png";
-import shadowheart from "./assets/shadowheart.png";
-import laezel from "./assets/laezel.png";
-import gale from "./assets/gale.png";
-import gortash from "./assets/gortash.png";
-import halsin from "./assets/halsin.png";
-import minthara from "./assets/minthara.png";
+// import karlach from "./assets/karlach.png";
+// import astarion from "./assets/astarion.png";
+// import wyll from "./assets/wyll.png";
+// import shadowheart from "./assets/shadowheart.png";
+// import laezel from "./assets/laezel.png";
+// import gale from "./assets/gale.png";
+// import gortash from "./assets/gortash.png";
+// import halsin from "./assets/halsin.png";
+// import minthara from "./assets/minthara.png";
 
 import karlachThumb from "./assets/karlach-thumb.png";
 import astarionThumb from "./assets/astarion-thumb.png";
@@ -68,7 +68,7 @@ const makePuzzleAndSolutionAsync = async (
   }
 };
 
-function App() {
+function App(): React.ReactNode {
   const [gameState, setGameState] = useState<GameState>("Loading");
   const [selectedNumber, setSelectedNumber] = useState<number>(UNSET_VALUE);
   const [selectedDifficulty, setSelectedDifficulty] =
@@ -101,37 +101,36 @@ function App() {
 
   const digitToAvatar = (
     element: number,
-    fullsize: boolean = false,
   ): React.ReactNode => {
     // in every program that actually does anything you write an ugly switch statement
     let avatarPath = null;
     switch (element) {
       case 1:
-        avatarPath = fullsize ? karlach : karlachThumb;
+        avatarPath = karlachThumb;
         break;
       case 2:
-        avatarPath = fullsize ? astarion : astarionThumb;
+        avatarPath = astarionThumb;
         break;
       case 3:
-        avatarPath = fullsize ? wyll : wyllThumb;
+        avatarPath = wyllThumb;
         break;
       case 4:
-        avatarPath = fullsize ? shadowheart : shadowheartThumb;
+        avatarPath = shadowheartThumb;
         break;
       case 5:
-        avatarPath = fullsize ? gale : galeThumb;
+        avatarPath = galeThumb;
         break;
       case 6:
-        avatarPath = fullsize ? gortash : gortashThumb;
+        avatarPath = gortashThumb;
         break;
       case 7:
-        avatarPath = fullsize ? halsin : halsinThumb;
+        avatarPath = halsinThumb;
         break;
       case 8:
-        avatarPath = fullsize ? minthara : mintharaThumb;
+        avatarPath = mintharaThumb;
         break;
       case 9:
-        avatarPath = fullsize ? laezel : laezelThumb;
+        avatarPath = laezelThumb;
         break;
       default:
         break;
@@ -235,7 +234,7 @@ function App() {
                         onClickNumberSelector(i + 1);
                       }}
                     >
-                      {digitToAvatar(i + 1, true)}
+                      {digitToAvatar(i + 1)}
                     </td>
                   ))}
               </tr>

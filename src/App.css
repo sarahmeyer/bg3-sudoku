@@ -43,6 +43,10 @@
   margin-left: auto;
 }
 
+.control-buttons {
+  margin-top: 15px;
+}
+
 td {
   line-height: 0;
 }

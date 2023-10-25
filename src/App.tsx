@@ -189,12 +189,11 @@ function App() {
     }
 
     setCurrentBoard(newBoard);
-    console.log(
-      puzzleSolution.join(""),
-      currentBoard.join(""),
-      puzzleSolution.join("") === currentBoard.join(""),
-    );
-    if (puzzleSolution.join("") === currentBoard.join("")) {
+
+    // this is where the magic happens
+    // if the current board is the same as the solution
+    // the game is won!
+    if (puzzleSolution.join("") === newBoard.join("")) {
       setGameState("Complete");
     }
   };
@@ -210,21 +209,12 @@ function App() {
     }
   };
 
-  const onClickSubmit = (): void => {
-    // this is where the magic happens
-    // if the current board is the same as the solution
-    // the game is won!
-    if (puzzleSolution.join("") === currentBoard.join("")) {
-      setGameState("Complete");
-    }
-  };
-
   const onSelectDifficulty = (
     evt: React.ChangeEvent<HTMLInputElement>,
   ): void => {
     const { value } = evt.target;
     console.log({ value });
-    setSelectedDifficulty(value as DifficultyLevel);
+    setSelectedDifficulty(value as DifficultyLevel)
   };
 
   return (
@@ -234,26 +224,6 @@ function App() {
         You'd better…
       </h2>
       <h1>Gather Your Party</h1>
-      <div className="controls">
-        <fieldset>
-          <legend>Select a difficulty level</legend>
-          <div className="difficulties">
-            {difficultyLevels.map((level) => (
-              <div key={level}>
-                <input
-                  type="radio"
-                  onChange={onSelectDifficulty}
-                  id={level}
-                  name="difficultyLevel"
-                  value={level}
-                  checked={level === selectedDifficulty}
-                />
-                <label htmlFor={level}>{level}</label>
-              </div>
-            ))}
-          </div>
-        </fieldset>
-      </div>
       <div className="card">
         <div>
           <h3>Choose Your Fighter</h3>
@@ -307,8 +277,27 @@ function App() {
             You Won!
           </p>
         }
+        <div className="controls">
+          <fieldset>
+            <legend>Select a difficulty level</legend>
+            <div className="difficulties">
+              {difficultyLevels.map((level) => (
+                <div key={level}>
+                  <input
+                    type="radio"
+                    onChange={onSelectDifficulty}
+                    id={level}
+                    name="difficultyLevel"
+                    value={level}
+                    checked={level === selectedDifficulty}
+                  />
+                  <label htmlFor={level}>{level}</label>
+                </div>
+              ))}
+            </div>
+          </fieldset>
+        </div>
         <div className="control-buttons">
-          <button onClick={onClickSubmit}>Check Solution</button>
           <button onClick={onClickReset}>New Puzzle</button>
         </div>
       </div>

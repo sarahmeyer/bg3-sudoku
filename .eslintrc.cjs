@@ -5,7 +5,9 @@ module.exports = {
     },
     "extends": [
         "standard-with-typescript",
-        "plugin:react/recommended"
+        'eslint:recommended',
+        "plugin:react/recommended",
+        'plugin:@typescript-eslint/recommended'
     ],
     "overrides": [
         {
@@ -24,9 +26,12 @@ module.exports = {
         "ecmaVersion": "latest",
         "sourceType": "module"
     },
+    "parser": '@typescript-eslint/parser',
     "plugins": [
-        "react"
+        "react",
+        '@typescript-eslint'
     ],
     "rules": {
-    }
+    },
+    "root": true
 }

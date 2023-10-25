@@ -86,9 +86,7 @@ function App() {
       const puzzleAndSolution =
         await makePuzzleAndSolutionAsync(selectedDifficulty);
       if (
-        puzzleAndSolution &&
-        puzzleAndSolution !== null &&
-        puzzle?.length > 1
+        puzzleAndSolution !== undefined && puzzle?.length > 1
       ) {
         setCurrentBoard(puzzleAndSolution[0]);
         setPuzzle(puzzleAndSolution[0]);
@@ -189,8 +187,6 @@ function App() {
     }
 
     setCurrentBoard(newBoard);
-
-    // this is where the magic happens
     // if the current board is the same as the solution
     // the game is won!
     if (puzzleSolution.join("") === newBoard.join("")) {
@@ -200,7 +196,7 @@ function App() {
 
   const onClickNumberSelector = (n: number): void => {
     // the "number selector" is a list of all the characters
-    // clicking on one selects the character/number as the one to fill in
+    // clicking on one selects the character/number as the one that fills empty squares
     // unless that one is already the 'selected number', in which case it's unset
     if (n !== selectedNumber) {
       setSelectedNumber(n);
@@ -221,7 +217,7 @@ function App() {
     <>
       <h2>
         The bloodthirsty dopplegangers who live in the sewers are attacking!
-        You'd better…
+        You&apos;d better…
       </h2>
       <h1>Gather Your Party</h1>
       <div className="card">
@@ -249,7 +245,7 @@ function App() {
 
         <p>
           Keep the same face out of the same party (3x3 square or vertical or
-          horizontal line). You'll know when you've won!{" "}
+          horizontal line). You&apos;ll know when you&apos;ve won!{" "}
         </p>
         <table className="sudoku-board">
           <tbody>
@@ -264,7 +260,7 @@ function App() {
                         onClickSpace(j + i);
                       }}
                     >
-                      {digitToAvatar(el, true)}
+                      {digitToAvatar(el)}
                     </td>
                   ))}
                 </tr>
@@ -296,14 +292,14 @@ function App() {
               ))}
             </div>
           </fieldset>
-        </div>
+      </div>
         <div className="control-buttons">
           <button onClick={onClickReset}>New Puzzle</button>
         </div>
       </div>
       <div className="footer">
         <p>
-          <a href="https://github.com/sarahmeyer/bg3-sudoku">src for this game.</a> thank you to forfuns for <a href="https://github.com/einsitang/sudoku-nodejs">the sudoku package</a> and larian for bg3
+          <a href="https://github.com/sarahmeyer/bg3-sudoku">src for this game.</a> thank you to forfuns for their <a href="https://github.com/einsitang/sudoku-nodejs">sudoku package</a> and larian for bg3
         </p>
       </div>
     </>

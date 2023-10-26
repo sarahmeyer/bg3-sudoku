@@ -43,7 +43,7 @@ const UNSET_VALUE = -1;
 const EMPTY_BOARD = [...Array(WIDTH * WIDTH)].map(() => UNSET_VALUE);
 // a board that is all astarion
 const ROOM_AND_IM_THE_BOARD = [...Array(WIDTH * WIDTH)].map(
-  () => megaMap.Astarion,
+  () => megaMap.astarion,
 );
 
 const makePuzzleAndSolutionAsync = async (

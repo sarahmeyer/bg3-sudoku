@@ -3,16 +3,6 @@ import { Sudoku, generator as sudokuGenerator } from "@forfuns/sudoku";
 
 import "./App.css";
 
-// import karlach from "./assets/karlach.png";
-// import astarion from "./assets/astarion.png";
-// import wyll from "./assets/wyll.png";
-// import shadowheart from "./assets/shadowheart.png";
-// import laezel from "./assets/laezel.png";
-// import gale from "./assets/gale.png";
-// import gortash from "./assets/gortash.png";
-// import halsin from "./assets/halsin.png";
-// import minthara from "./assets/minthara.png";
-
 import karlachThumb from "./assets/karlach-thumb.png";
 import astarionThumb from "./assets/astarion-thumb.png";
 import wyllThumb from "./assets/wyll-thumb.png";
@@ -23,6 +13,20 @@ import gortashThumb from "./assets/gortash-thumb.png";
 import halsinThumb from "./assets/halsin-thumb.png";
 import mintharaThumb from "./assets/minthara-thumb.png";
 
+// the arbitrary mapping of bg3 characters to numbers between 1-9
+// order needs to match switch statement in digitToAvatar
+enum megaMap {
+  "karlach",
+  "astarion",
+  "wyll",
+  "shadowheart",
+  "gale",
+  "gortash",
+  "halsin",
+  "minthara",
+  "laezel",
+}
+
 // const fruits = ["Apple", "Orange", "Pear"] as const;
 // type Fruit = typeof fruits[number]; // "Apple" | "Orange" | "Pear"
 const gameStates = ["Loading", "Playing", "Complete", "Error"] as const;
@@ -31,21 +35,6 @@ const difficultyLevels = ["Explorer", "Normal", "Tactician"] as const;
 type DifficultyLevel = (typeof difficultyLevels)[number];
 type SudokuPuzzle = number[];
 
-// the arbitrary mapping of bg3 characters to numbers between 1-9
-// that is at the heart of this smudge of software
-// or not
-// const megaMap = {
-//   1: 'karlach',
-//   2: 'astarion',
-//   3: 'wyll',
-//   4: 'shadowheart',
-//   5: 'gale',
-//   6: 'gortash',
-//   7: 'halsin',
-//   8: 'minthara',
-//   9: 'laezel'
-// }
-
 // sudoku boards are 9x9
 const WIDTH = 9;
 // this value for empty squares comes from @forfuns/sudoku
@@ -53,7 +42,9 @@ const UNSET_VALUE = -1;
 // an array of width^2 length, all values are -1 representing empty squares
 const EMPTY_BOARD = [...Array(WIDTH * WIDTH)].map(() => UNSET_VALUE);
 // a board that is all astarion
-const ROOM_AND_IM_THE_BOARD = [...Array(WIDTH * WIDTH)].map(() => UNSET_VALUE);
+const ROOM_AND_IM_THE_BOARD = [...Array(WIDTH * WIDTH)].map(
+  () => megaMap.Astarion,
+);
 
 const makePuzzleAndSolutionAsync = async (
   level: DifficultyLevel,
@@ -73,6 +64,7 @@ function App(): React.ReactNode {
   const [selectedNumber, setSelectedNumber] = useState<number>(UNSET_VALUE);
   const [selectedDifficulty, setSelectedDifficulty] =
     useState<DifficultyLevel>("Explorer");
+  const [highlightMistakes, setHighlightMistakes] = useState(false);
 
   const [puzzle, setPuzzle] = useState<SudokuPuzzle>(EMPTY_BOARD);
   const [puzzleSolution, setPuzzleSolution] = useState<SudokuPuzzle>(
@@ -85,9 +77,7 @@ function App(): React.ReactNode {
     async function getPuzzle(): Promise<void> {
       const puzzleAndSolution =
         await makePuzzleAndSolutionAsync(selectedDifficulty);
-      if (
-        puzzleAndSolution !== undefined && puzzle?.length > 1
-      ) {
+      if (puzzleAndSolution !== undefined && puzzle?.length > 1) {
         setCurrentBoard(puzzleAndSolution[0]);
         setPuzzle(puzzleAndSolution[0]);
         setPuzzleSolution(puzzleAndSolution[1]);
@@ -99,9 +89,7 @@ function App(): React.ReactNode {
     });
   }, []);
 
-  const digitToAvatar = (
-    element: number,
-  ): React.ReactNode => {
+  const digitToAvatar = (element: number): React.ReactNode => {
     // in every program that actually does anything you write an ugly switch statement
     let avatarPath = null;
     switch (element) {
@@ -142,12 +130,22 @@ function App(): React.ReactNode {
     return null;
   };
 
-  const puzzleCellClasses = (i: number): string => {
+  const puzzleCellClasseNames = (i: number): string => {
     // for styling purposes, if the game has been won
     if (gameState === "Complete" || gameState === "Loading") {
       return "fixed-space";
     }
-    return puzzle[i] > 0 ? "fixed-space" : "";
+    if (puzzle[i] > 0) {
+      return "fixed-space";
+    }
+    if (
+      currentBoard[i] !== UNSET_VALUE &&
+      currentBoard[i] !== puzzleSolution[i] &&
+      highlightMistakes
+    ) {
+      return "wrong-value";
+    }
+    return "";
   };
 
   const onClickReset = (): void => {
@@ -209,7 +207,7 @@ function App(): React.ReactNode {
   ): void => {
     const { value } = evt.target;
     console.log({ value });
-    setSelectedDifficulty(value as DifficultyLevel)
+    setSelectedDifficulty(value as DifficultyLevel);
   };
 
   return (
@@ -225,18 +223,17 @@ function App(): React.ReactNode {
           <table className="number-selector">
             <tbody>
               <tr>
-                {[...Array(9)]
-                  .map((_, i) => (
-                    <td
-                      key={`number-selector-cell-${i + 1}`}
-                      className={selectedNumber === i + 1 ? "selected" : ""}
-                      onClick={() => {
-                        onClickNumberSelector(i + 1);
-                      }}
-                    >
-                      {digitToAvatar(i + 1)}
-                    </td>
-                  ))}
+                {[...Array(9)].map((_, i) => (
+                  <td
+                    key={`number-selector-cell-${i + 1}`}
+                    className={selectedNumber === i + 1 ? "selected" : ""}
+                    onClick={() => {
+                      onClickNumberSelector(i + 1);
+                    }}
+                  >
+                    {digitToAvatar(i + 1)}
+                  </td>
+                ))}
               </tr>
             </tbody>
           </table>
@@ -254,12 +251,13 @@ function App(): React.ReactNode {
                   {currentBoard.slice(i, i + WIDTH).map((el, j) => (
                     <td
                       key={`cell${i + j}`}
-                      className={puzzleCellClasses(i + j)}
+                      className={puzzleCellClasseNames(i + j)}
                       onClick={() => {
                         onClickSpace(j + i);
                       }}
                     >
                       {digitToAvatar(el)}
+                      <div className="sudoku-board-space-overlay"></div>
                     </td>
                   ))}
                 </tr>
@@ -273,6 +271,23 @@ function App(): React.ReactNode {
           </p>
         }
         <div className="controls">
+          <fieldset>
+            <legend>Cheats</legend>
+            <div>
+              <input
+                type="checkbox"
+                id="highlightMistakes"
+                name="highlightMistakes"
+                onChange={() => {
+                  setHighlightMistakes(!highlightMistakes);
+                }}
+                defaultChecked={highlightMistakes}
+              />
+              <label htmlFor="highlightMistakes">
+                Highlight incorrect placements
+              </label>
+            </div>
+          </fieldset>
           <fieldset>
             <legend>Select a difficulty level</legend>
             <div className="difficulties">
@@ -291,14 +306,21 @@ function App(): React.ReactNode {
               ))}
             </div>
           </fieldset>
-      </div>
+        </div>
         <div className="control-buttons">
           <button onClick={onClickReset}>New Puzzle</button>
         </div>
       </div>
       <div className="footer">
         <p>
-          <a href="https://github.com/sarahmeyer/bg3-sudoku">src for this game.</a> thank you to forfuns for their <a href="https://github.com/einsitang/sudoku-nodejs">sudoku package</a> and larian for bg3
+          <a href="https://github.com/sarahmeyer/bg3-sudoku">
+            src for this game.
+          </a>{" "}
+          thank you to forfuns for their{" "}
+          <a href="https://github.com/einsitang/sudoku-nodejs">
+            sudoku package
+          </a>{" "}
+          and larian for bg3
         </p>
       </div>
     </>

@@ -8,7 +8,7 @@ module.exports = {
         'eslint:recommended',
         "plugin:react/recommended",
         'plugin:@typescript-eslint/recommended',
-        'prettier'
+        "plugin:prettier/recommended"
     ],
     "overrides": [
         {
@@ -30,9 +30,11 @@ module.exports = {
     "parser": '@typescript-eslint/parser',
     "plugins": [
         "react",
-        '@typescript-eslint'
+        '@typescript-eslint',
+        'prettier'
     ],
     "rules": {
+        "prettier/prettier": "error"
     },
     "root": true
 }

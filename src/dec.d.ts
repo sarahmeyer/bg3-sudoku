@@ -1,1 +1,1 @@
-declare module "@forfuns/sudoku"
+declare module "@forfuns/sudoku";

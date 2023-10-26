@@ -78,6 +78,10 @@ td {
   opacity: 0.5;
 }
 
+.sudoku-board td.wrong-value .sudoku-board-space-overlay {
+  display: block;
+}
+
 .sudoku-board td:first-child {
   border-left: 3px solid black;
 }
@@ -94,12 +98,24 @@ td {
   width: 9vw;
   min-width: 30px;
   max-width: 80px;
+  position: relative;
 }
 
 .sudoku-board td img {
   width: 9vw;
   min-width: 30px;
   max-width: 80px;
+}
+
+.sudoku-board-space-overlay {
+  height: 100%;
+  width: 9vw;
+  min-width: 30px;
+  max-width: 80px;
+  background-color: rgba(255,0,0,0.5);
+  position: absolute;
+  top: 0;
+  display: none;
 }
 
 .number-selector {
